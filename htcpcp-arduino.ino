@@ -118,11 +118,21 @@ void loop()
         }
     }
 
+    /* Handle method */
+    if (!method.equals("BREW") && !method.equals("POST")
+        && !method.equals("GET") && !method.equals("PROPFIND")) {
+      send_short_response(client, 501, "Not Implemented");
+      goto cleanup;
+    }
+
     if (!path.equals("/pot-1")) {
       /* Only 1 pot :D */
       send_short_response(client, 404, "Pot Not Found");
       goto cleanup;
     }
+
+    send_short_response(client, 200, "OK");
+    goto cleanup;
 
 bad_request:
     send_short_response(client, 400, "Bad Request");
