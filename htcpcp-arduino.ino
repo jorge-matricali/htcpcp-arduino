@@ -1,3 +1,20 @@
+/*
+Copyright (C) 2018 Jorge Matricali <jorgematricali@gmail.com>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include <SPI.h>
 #include <Ethernet.h>
 
@@ -8,6 +25,7 @@ void send_short_response(EthernetClient client, int status, String message);
 
 byte mac[] = {0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02};
 EthernetServer server(LISTEN_PORT);
+pot_t *POT = NULL;
 
 void setup()
 {
@@ -106,16 +124,16 @@ void loop()
     
     /* An http request ends with a blank line */
     while (client.connected() && client.available()) {
-        char c = client.read();
-        Serial.write(c);
-        if (c == '\n' && currentLineIsBlank) {
-          break;
-        }
-        if (c == '\n') {
-          currentLineIsBlank = true;
-        } else if (c != '\r') {
-          currentLineIsBlank = false;
-        }
+      char c = client.read();
+      Serial.write(c);
+      if (c == '\n' && currentLineIsBlank) {
+        break;
+      }
+      if (c == '\n') {
+        currentLineIsBlank = true;
+      } else if (c != '\r') {
+        currentLineIsBlank = false;
+      }
     }
 
     /* Handle method */
@@ -129,6 +147,10 @@ void loop()
       /* Only 1 pot :D */
       send_short_response(client, 404, "Pot Not Found");
       goto cleanup;
+    }
+
+    if (method.equals("BREW") && !method.equals("POST")) {
+      
     }
 
     send_short_response(client, 200, "OK");
