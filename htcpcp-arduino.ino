@@ -74,12 +74,16 @@ void setup()
 
 void send_short_response(EthernetClient client, int status, String message)
 {
+  time_t timer = now();
+  struct tm *tv;
+  tv = gmtime(&timer);
+  char datetime[32] = "";
+  sprintf(datetime, "Date: %02d-%02d-%04d %02d:%02d:%02d GMT", tv->tm_mday, tv->tm_mon, tv->tm_year, tv->tm_hour, tv->tm_min, tv->tm_sec);
   client.print("HTCPCP/1.0 ");
   client.print(status);
   client.print(" ");
   client.println(message);
-  client.print("Date: ");
-  client.println(now());
+  client.println(datetime);
   client.println("Content-Type: text/html");
   client.println("Connection: close");  // the connection will be closed after completion of the response
   client.println();
