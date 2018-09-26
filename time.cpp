@@ -15,30 +15,25 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef POT_H
-#define POT_H
-
+#include <stdint.h> /* uint32_t */
+#include <Arduino.h> /* millis */
 #include "time.h"
 
-#define PIN_LED_LINK 5
-#define PIN_LED_STATUS_READY 6
+static uint32_t sysTime = 0;
+static uint32_t prevMillis = 0;
+static uint32_t nextSyncTime = 0;
 
-typedef enum pot_status {
-    POT_STATUS_ERROR = 0,
-    POT_STATUS_READY = 1,
-    POT_STATUS_BREWING = 2
-} pot_status_t;
+time_t now()
+{
+  while (millis() - prevMillis >= 1000) {
+    sysTime++;
+    prevMillis += 1000;
+  }
+  return (time_t)sysTime;
+}
 
-typedef struct {
-    pot_status_t status;
-    int served;
-    time_t start_time;
-    time_t end_time;
-} pot_t;
-
-void pot_brew(pot_t *pot);
-void pot_destroy(pot_t *pot);
-void pot_init(pot_t *pot);
-void pot_refresh(pot_t *pot);
-
-#endif /* POT_H */
+void setTime(time_t t)
+{ 
+  sysTime = (uint32_t)t;  
+  prevMillis = millis();
+}

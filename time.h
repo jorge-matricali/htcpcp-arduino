@@ -15,30 +15,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef POT_H
-#define POT_H
+#ifndef TIME_H
+#define TIME_H
 
-#include "time.h"
+typedef unsigned long time_t;
 
-#define PIN_LED_LINK 5
-#define PIN_LED_STATUS_READY 6
+time_t now();
+void setTime(time_t t);
+void setTime(int hr, int min, int sec, int day, int month, int yr);
 
-typedef enum pot_status {
-    POT_STATUS_ERROR = 0,
-    POT_STATUS_READY = 1,
-    POT_STATUS_BREWING = 2
-} pot_status_t;
-
-typedef struct {
-    pot_status_t status;
-    int served;
-    time_t start_time;
-    time_t end_time;
-} pot_t;
-
-void pot_brew(pot_t *pot);
-void pot_destroy(pot_t *pot);
-void pot_init(pot_t *pot);
-void pot_refresh(pot_t *pot);
-
-#endif /* POT_H */
+#endif /* TIME_H */

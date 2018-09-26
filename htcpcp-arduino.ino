@@ -17,14 +17,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <SPI.h>
 #include <Ethernet.h>
-#include <assert.h>
 
 #include "pot.h"
 
 #define LISTEN_PORT 80
-
-const int PIN_LED_LINK = 5;
-const int PIN_LED_STATUS_READY = 6;
 
 /* Prototipos */
 void send_short_response(EthernetClient client, int status, String message);
