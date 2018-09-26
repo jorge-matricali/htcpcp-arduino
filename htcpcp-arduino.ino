@@ -17,8 +17,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <SPI.h>
 #include <Ethernet.h>
+#include <assert.h>
+
+#include "pot.h"
 
 #define LISTEN_PORT 80
+
+const int PIN_LED_LINK = 5;
+const int PIN_LED_STATUS_READY = 6;
 
 /* Prototipos */
 void send_short_response(EthernetClient client, int status, String message);
@@ -29,12 +35,24 @@ pot_t *POT = NULL;
 
 void setup()
 {
+  pinMode(PIN_LED_LINK, OUTPUT);
+  pinMode(PIN_LED_STATUS_READY, OUTPUT);
+  digitalWrite(PIN_LED_LINK, LOW);
+  digitalWrite(PIN_LED_STATUS_READY, LOW);
+
   Serial.begin(9600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
   
   Serial.println("HTCPCP/1.0 Server");
+  POT = (pot_t *) malloc(sizeof *POT);
+  if (POT == NULL) {
+    Serial.println("Cannot allocate POT");
+    exit(1);
+  }
+  pot_init(POT);
+  
   Serial.println("Obtaining an IP address...");
   Ethernet.begin(mac);
   if (Ethernet.hardwareStatus() == EthernetNoHardware) {
@@ -52,6 +70,9 @@ void setup()
   Serial.print(Ethernet.localIP());
   Serial.print(":");
   Serial.println(LISTEN_PORT);
+
+  digitalWrite(PIN_LED_LINK, HIGH);
+  pot_refresh(POT);
 }
 
 void send_short_response(EthernetClient client, int status, String message)
@@ -150,10 +171,21 @@ void loop()
     }
 
     if (method.equals("BREW") && !method.equals("POST")) {
+      pot_refresh(POT);
+
+      if (POT->status == POT_STATUS_BREWING) {
+        Serial.println("POT BUSY!");
+        send_short_response(client, 510, "Pot Busy");
+        goto cleanup;
+      }
       
+      Serial.println("Brewing...");
+      pot_brew(POT);
+      send_short_response(client, 200, "OK");
+      goto cleanup;
     }
 
-    send_short_response(client, 200, "OK");
+    send_short_response(client, 501, "Not Implemented");
     goto cleanup;
 
 bad_request:
