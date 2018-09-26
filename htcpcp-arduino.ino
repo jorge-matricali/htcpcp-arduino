@@ -19,6 +19,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <Ethernet.h>
 
 #include "pot.h"
+#include "time.h"
 
 #define LISTEN_PORT 80
 
@@ -77,6 +78,8 @@ void send_short_response(EthernetClient client, int status, String message)
   client.print(status);
   client.print(" ");
   client.println(message);
+  client.print("Date: ");
+  client.println(now());
   client.println("Content-Type: text/html");
   client.println("Connection: close");  // the connection will be closed after completion of the response
   client.println();
@@ -192,4 +195,5 @@ cleanup:
     client.stop();
     Serial.print("Client disconnected.");
   }
+  pot_refresh(POT);
 }
